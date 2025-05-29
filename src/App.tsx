@@ -20,6 +20,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 function App() {
   const { isDarkTheme, setTheme, toggleTheme } = useTheme();
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [showBackground, setShowBackground] = useState<boolean>(false);
   
   // Ensure proper theme application to document root
   useEffect(() => {
@@ -29,11 +30,11 @@ function App() {
     // Add smooth transitions for theme changes
     document.documentElement.style.transition = 'background-color 0.5s ease, color 0.5s ease';
     
-    // Add matrix background to body in case of any loading delays
-    document.body.style.backgroundImage = isDarkTheme 
-      ? 'linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,10,0,0.9))'
-      : 'linear-gradient(to bottom, rgba(240,240,240,0.9), rgba(240,250,240,0.9))';
-    document.body.style.transition = 'background-image 0.5s ease';
+    // Add static background color to body - no gradients or effects that could cause black screen
+    document.body.style.backgroundColor = isDarkTheme 
+      ? '#111111' // Dark gray instead of black
+      : '#f5f5f5'; // Light gray
+    document.body.style.transition = 'background-color 0.5s ease';
     
   }, [isDarkTheme]);
 
@@ -55,66 +56,35 @@ function App() {
   
   return (
     <ThemeContext.Provider value={{ isDarkTheme, setTheme, toggleTheme }}>
-      <div className={`h-full w-full flex flex-col ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
-        {/* Background Effects - Optimize for mobile */}
-        <MatrixBackground 
-          density={isMobile ? 0.4 : 0.7} // Significantly reduced density
-          speed={0.5} // Slower speed
-          fadeOpacity={0.005} // Extremely reduced fade opacity
-          glowEffect={true}
-          depthEffect={true}
-          characters="01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ▓▒░█▄▀■□●○"
-        />
-        <ParticleEffect 
-          count={isMobile ? 20 : 40} // Further reduced particle count
-          connectDistance={isMobile ? 80 : 120} // Reduced connect distance
-          opacity={0.3} // Lower opacity
-          pulseEffect={true}
-          size={0.8} // Smaller particles
-          depthEffect={true}
-          trailEffect={!isMobile}
-        />
+      <div className={`h-full w-full flex flex-col ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}
+           style={{ 
+             backgroundColor: isDarkTheme ? '#111111' : '#f5f5f5',
+             color: isDarkTheme ? '#ffffff' : '#333333'
+           }}>
+        {/* Temporarily disabled MatrixBackground */}
+        {showBackground && (
+          <MatrixBackground 
+            density={isMobile ? 0.2 : 0.3} 
+            speed={0.3}
+            fadeOpacity={0.0005}
+            glowEffect={false}
+            depthEffect={true}
+            characters="01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ▓▒░█▄▀■□●○"
+          />
+        )}
         
-        {/* Ambient background gradients - extremely light */}
-        <div 
-          className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-          style={{ 
-            background: isDarkTheme 
-              ? 'radial-gradient(circle at 30% 50%, rgba(0,50,0,0.01) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,30,0,0.01) 0%, rgba(0,0,0,0) 70%)' 
-              : 'radial-gradient(circle at 30% 50%, rgba(0,80,0,0.005) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,50,0,0.005) 0%, rgba(0,0,0,0) 70%)',
-            mixBlendMode: 'screen',
-            transition: 'background 0.5s ease'
-          }}
-        />
-        
-        {/* Animated gradient overlay - minimal opacity */}
-        <div 
-          className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-[0.02] z-0 animate-gradient-xy"
-          style={{ 
-            background: isDarkTheme 
-              ? 'linear-gradient(45deg, rgba(0,255,65,0.03), rgba(0,102,255,0.03), rgba(157,0,255,0.03), rgba(0,255,255,0.03))' 
-              : 'linear-gradient(45deg, rgba(0,119,51,0.01), rgba(0,102,255,0.01), rgba(157,0,255,0.01), rgba(0,119,51,0.01))',
-            backgroundSize: '400% 400%',
-            transition: 'background 0.5s ease'
-          }}
-        />
-        
-        {/* Vignette Effect - extremely light */}
-        <div 
-          className="fixed top-0 left-0 w-full h-full pointer-events-none"
-          style={{ 
-            boxShadow: isDarkTheme 
-              ? 'inset 0 0 150px rgba(0,0,0,0.2)' 
-              : 'inset 0 0 150px rgba(0,0,0,0.05)',
-            transition: 'box-shadow 0.5s ease'
-          }}
-        />
-        
-        {/* CRT Screen Effect - Disable on mobile for performance */}
-        {!isMobile && <div className="crt-effect" style={{ opacity: isDarkTheme ? 0.02 : 0.01 }} />}
-        
-        {/* Custom Cursor - Only on desktop */}
-        {!isMobile && <CustomCursor />}
+        {/* Minimal particle effect */}
+        {showBackground && (
+          <ParticleEffect 
+            count={isMobile ? 10 : 20}
+            connectDistance={isMobile ? 50 : 80}
+            opacity={0.2}
+            pulseEffect={false}
+            size={0.5}
+            depthEffect={false}
+            trailEffect={false}
+          />
+        )}
         
         {/* Theme Toggle - Responsive position */}
         <div className="fixed top-4 right-4 z-50">
@@ -125,46 +95,27 @@ function App() {
         <main className="flex-1 z-10 w-full max-w-6xl mx-auto px-4 py-6 md:py-8 lg:py-16">
           <div className="grid gap-6 md:gap-8 lg:gap-12">
             <div className="space-y-6 md:space-y-8">
-              {/* Profile Section - Enhanced with animations */}
-              <motion.div 
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                className="text-center mb-4 md:mb-8"
-              >
-                <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-green-500 font-mono tracking-tight mb-2 md:mb-4 hover:text-shadow-glow transition-all duration-300">
-                  <span className="relative inline-block">
-                    DIGITAL WORKSPACE
-                    <span className="absolute top-0 left-0 -ml-1 text-blue-400/30" aria-hidden="true">DIGITAL WORKSPACE</span>
-                    <span className="absolute top-0 left-0 ml-1 text-red-400/30" aria-hidden="true">DIGITAL WORKSPACE</span>
-                  </span>
+              {/* Profile Section */}
+              <div className="text-center mb-4 md:mb-8">
+                <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-green-500 font-mono tracking-tight mb-2 md:mb-4">
+                  DIGITAL WORKSPACE
                 </h1>
-                <motion.p 
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: 1 }}
-                  className={`${isDarkTheme ? 'text-green-400/80' : 'text-green-700/80'} text-base md:text-lg lg:text-xl font-mono`}
-                >
+                <p className={`${isDarkTheme ? 'text-green-400/80' : 'text-green-700/80'} text-base md:text-lg lg:text-xl font-mono`}>
                   Security Research & Development Hub
-                </motion.p>
-              </motion.div>
+                </p>
+              </div>
 
-              {/* Main Card - Responsive sizing with enhanced animations */}
-              <motion.div
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-              >
+              {/* Main Card */}
+              <div>
                 <SocialCard isMobile={isMobile} />
-              </motion.div>
+              </div>
             </div>
             
-            <motion.footer 
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 1 }}
-              className="text-center mt-6 md:mt-auto pb-16 md:pb-8"
-            >
+            <footer className="text-center mt-6 md:mt-auto pb-16 md:pb-8">
               <p className={`${isDarkTheme ? 'text-green-500/50' : 'text-green-700/50'} text-xs font-mono`}>
                 &lt;/&gt; with 💻 by Binar | {new Date().getFullYear()}
               </p>
-            </motion.footer>
+            </footer>
           </div>
         </main>
 
