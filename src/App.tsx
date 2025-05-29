@@ -20,7 +20,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 function App() {
   const { isDarkTheme, setTheme, toggleTheme } = useTheme();
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [showBackground, setShowBackground] = useState<boolean>(false);
+  const [showBackground, setShowBackground] = useState<boolean>(true); // Enable backgrounds but keep them subtle
   
   // Ensure proper theme application to document root
   useEffect(() => {
@@ -36,6 +36,11 @@ function App() {
       : '#f5f5f5'; // Light gray
     document.body.style.transition = 'background-color 0.5s ease';
     
+    // Enable backgrounds after a short delay to ensure content is loaded first
+    const timer = setTimeout(() => {
+      setShowBackground(true);
+    }, 500);
+    return () => clearTimeout(timer);
   }, [isDarkTheme]);
 
   // Check for mobile devices
@@ -61,30 +66,42 @@ function App() {
              backgroundColor: isDarkTheme ? '#111111' : '#f5f5f5',
              color: isDarkTheme ? '#ffffff' : '#333333'
            }}>
-        {/* Temporarily disabled MatrixBackground */}
+        {/* Very minimal background effects */}
         {showBackground && (
           <MatrixBackground 
-            density={isMobile ? 0.2 : 0.3} 
-            speed={0.3}
-            fadeOpacity={0.0005}
+            density={isMobile ? 0.1 : 0.2} // Very low density
+            speed={0.2} // Very slow
+            fadeOpacity={0.0001} // Extremely low fade opacity
             glowEffect={false}
-            depthEffect={true}
-            characters="01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ▓▒░█▄▀■□●○"
+            depthEffect={false}
+            characters="01"
           />
         )}
         
-        {/* Minimal particle effect */}
+        {/* Very minimal particle effect */}
         {showBackground && (
           <ParticleEffect 
-            count={isMobile ? 10 : 20}
-            connectDistance={isMobile ? 50 : 80}
-            opacity={0.2}
+            count={isMobile ? 5 : 10} // Very few particles
+            connectDistance={isMobile ? 40 : 60}
+            opacity={0.1} // Very low opacity
             pulseEffect={false}
-            size={0.5}
+            size={0.3} // Very small
             depthEffect={false}
             trailEffect={false}
           />
         )}
+        
+        {/* Very subtle ambient gradients */}
+        <div 
+          className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
+          style={{ 
+            background: isDarkTheme 
+              ? 'radial-gradient(circle at 30% 50%, rgba(0,50,0,0.005) 0%, rgba(0,0,0,0) 80%), radial-gradient(circle at 70% 50%, rgba(0,30,0,0.005) 0%, rgba(0,0,0,0) 80%)' 
+              : 'radial-gradient(circle at 30% 50%, rgba(0,80,0,0.002) 0%, rgba(0,0,0,0) 80%), radial-gradient(circle at 70% 50%, rgba(0,50,0,0.002) 0%, rgba(0,0,0,0) 80%)',
+            mixBlendMode: 'normal',
+            opacity: 0.2
+          }}
+        />
         
         {/* Theme Toggle - Responsive position */}
         <div className="fixed top-4 right-4 z-50">

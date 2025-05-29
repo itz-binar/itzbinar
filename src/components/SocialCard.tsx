@@ -149,8 +149,8 @@ const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
       animate="visible"
       className={`relative w-full max-w-md mx-auto px-4 sm:px-8 py-6 sm:py-10 rounded-xl backdrop-blur-lg border border-green-500/30 card-hover-3d ${
         isDarkTheme 
-          ? 'bg-black/40 shadow-[0_0_15px_rgba(0,255,65,0.3)]' 
-          : 'bg-white/40 shadow-[0_0_15px_rgba(0,119,51,0.15)]'
+          ? 'bg-[#151515]/90 shadow-[0_0_15px_rgba(0,255,65,0.3)]'
+          : 'bg-white/90 shadow-[0_0_15px_rgba(0,119,51,0.15)]'
       }`}
     >
       <Toaster position="top-center" />
@@ -160,11 +160,11 @@ const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
         className="absolute top-0 left-0 w-full h-full rounded-xl -z-10 overflow-hidden"
         style={{
           background: isDarkTheme 
-            ? 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,30,0,0.8) 100%)' 
-            : 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(240,255,240,0.8) 100%)',
+            ? 'linear-gradient(135deg, rgba(17,17,17,0.95) 0%, rgba(0,30,0,0.95) 100%)'
+            : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,250,240,0.95) 100%)',
           boxShadow: isDarkTheme
-            ? 'inset 0 0 30px rgba(0,255,65,0.1)'
-            : 'inset 0 0 30px rgba(0,119,51,0.05)'
+            ? 'inset 0 0 30px rgba(0,255,65,0.15)'
+            : 'inset 0 0 30px rgba(0,119,51,0.1)'
         }}
       />
       
