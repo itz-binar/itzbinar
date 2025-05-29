@@ -7,7 +7,7 @@ export type Theme = 'dark' | 'light';
 
 export interface ThemeContextType {
   isDarkTheme: boolean;
-  setTheme: (theme: string) => void;
+  setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
 

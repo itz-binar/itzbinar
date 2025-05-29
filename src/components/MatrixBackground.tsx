@@ -1,204 +1,200 @@
-import React, { useEffect, useRef, useContext, memo, useState, useCallback } from 'react';
-import { ThemeContext } from '../App';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import { MatrixBackgroundProps, MatrixDrop } from '../types';
+import { ThemeContext } from '../App';
 
 const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
-  density = 1, 
-  speed = 1,
+  density = 1.0,
+  speed = 1.0,
   fadeOpacity = 0.05,
-  characters,
-  glowEffect = true,
-  depthEffect = true
+  characters = "01",
+  glowEffect = false,
+  depthEffect = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const dropsRef = useRef<MatrixDrop[]>([]);
+  const animationRef = useRef<number>(0);
   const { isDarkTheme } = useContext(ThemeContext);
-  const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   
-  // Define default character set
-  const defaultMatrix = '01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ';
-  const matrixChars = characters || defaultMatrix;
-  
-  // Handle resize with useCallback to optimize performance
-  const handleResize = useCallback(() => {
-    setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }, []);
-  
-  // Setup matrix effect
+  // Set up the canvas and initialize drops
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
+    const handleResize = () => {
+      const { innerWidth, innerHeight } = window;
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+      setDimensions({ width: innerWidth, height: innerHeight });
+      
+      // Re-initialize drops when resizing
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        initializeDrops(innerWidth, innerHeight);
+      }
+    };
+    
+    // Initial setup
+    handleResize();
+    
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, []);
+  
+  // Initialize drops based on screen dimensions and density
+  const initializeDrops = (width: number, height: number) => {
+    const drops: MatrixDrop[] = [];
+    const dropCount = Math.floor(width / 20 * density); // Adjust drop count based on density
+    
+    for (let i = 0; i < dropCount; i++) {
+      drops.push({
+        y: Math.random() * height * 2 - height, // Start some drops above the screen
+        speed: (Math.random() * 0.5 + 0.5) * speed, // Vary the speed
+        depth: Math.random(), // Depth effect (0-1)
+        lastChar: '',
+        lastSpecial: false,
+        changeInterval: Math.floor(Math.random() * 15) + 5, // How often to change characters
+        lastChange: 0
+      });
+    }
+    
+    dropsRef.current = drops;
+  };
+
+  // Animation loop
+  useEffect(() => {
+    if (!canvasRef.current || dimensions.width === 0) return;
+    
+    const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Set canvas dimensions
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    // Character set based on props and theme
+    const charSet = characters.split('');
     
-    // Calculate font size based on density
-    const fontSize = Math.max(10, Math.floor(14 * density));
-    const columns = Math.floor(canvas.width / fontSize);
-    
-    // Initialize drops array with random starting positions and depths
-    const drops: MatrixDrop[] = [];
-    for (let i = 0; i < columns; i++) {
-      // Some drops start above the canvas for a staggered effect
-      drops[i] = {
-        y: Math.floor(Math.random() * canvas.height * 2) - canvas.height,
-        speed: (0.5 + Math.random() * 0.5) * speed,
-        depth: Math.random(), // Random depth between 0-1
-        lastChar: '',
-        lastSpecial: false,
-        changeInterval: Math.floor(Math.random() * 3) + 1, // Change every 1-3 steps
-        lastChange: 0
-      };
-    }
-    
-    // Character variation - some characters have higher probability
-    const getRandomChar = (drop: MatrixDrop) => {
-      drop.lastChange++;
-      
-      // Only change character after interval unless it's not set
-      if (drop.lastChange < drop.changeInterval && drop.lastChar) {
-        return { char: drop.lastChar, special: drop.lastSpecial };
+    // Colors for different themes
+    const getColor = (depth: number, special: boolean = false) => {
+      if (isDarkTheme) {
+        if (special) {
+          return `rgba(0, 255, 255, ${0.5 + depth * 0.5})`;
+        }
+        return `rgba(0, ${155 + Math.floor(depth * 100)}, ${20 + Math.floor(depth * 60)}, ${0.6 + depth * 0.4})`;
+      } else {
+        if (special) {
+          return `rgba(0, 100, 120, ${0.7 + depth * 0.3})`;
+        }
+        return `rgba(0, ${80 + Math.floor(depth * 40)}, ${20 + Math.floor(depth * 30)}, ${0.5 + depth * 0.5})`;
       }
-      
-      // Reset change counter
-      drop.lastChange = 0;
-      
-      // Special effect: occasionally use a brighter character
-      // Deeper drops have lower chance of special chars
-      const specialChance = depthEffect ? 0.98 + (0.01 * drop.depth) : 0.98;
-      const specialChar = Math.random() > specialChance;
-      
-      // Get random character from the matrix set
-      const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-      
-      // Save last character and special status
-      drop.lastChar = char;
-      drop.lastSpecial = specialChar;
-      
-      return { char, special: specialChar };
     };
     
-    // Define the draw function
-    const draw = () => {
-      // Different background color and opacity based on theme
+    const getFontSize = (depth: number) => {
+      return depthEffect ? 10 + Math.floor(depth * 6) : 14;
+    };
+    
+    const getShadow = (depth: number, special: boolean = false) => {
+      if (!glowEffect) return '';
+      
+      if (isDarkTheme) {
+        if (special) {
+          return `0 0 ${5 + depth * 10}px rgba(0, 255, 255, ${0.5 + depth * 0.5})`;
+        }
+        return `0 0 ${3 + depth * 5}px rgba(0, 255, 65, ${0.3 + depth * 0.4})`;
+      } else {
+        if (special) {
+          return `0 0 ${3 + depth * 5}px rgba(0, 100, 120, ${0.3 + depth * 0.3})`;
+        }
+        return `0 0 ${2 + depth * 3}px rgba(0, 100, 0, ${0.2 + depth * 0.2})`;
+      }
+    };
+    
+    const drawMatrix = () => {
+      // Apply fade effect
       ctx.fillStyle = isDarkTheme 
         ? `rgba(0, 0, 0, ${fadeOpacity})` 
-        : `rgba(240, 240, 240, ${fadeOpacity})`;
+        : `rgba(245, 245, 245, ${fadeOpacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Loop through each column
-      for (let i = 0; i < drops.length; i++) {
-        const drop = drops[i];
+      // Draw each drop
+      dropsRef.current.forEach((drop, i) => {
+        // Determine if this should be a special character (brighter)
+        const isSpecial = Math.random() < 0.05;
         
-        // Get a character and determine if it's special (brighter)
-        const { char, special } = getRandomChar(drop);
+        // Get a random character from the set
+        const charIndex = Math.floor(Math.random() * charSet.length);
+        const char = charSet[charIndex];
         
-        // Calculate opacity based on depth if depth effect is enabled
-        const depthOpacity = depthEffect ? 0.4 + (drop.depth * 0.6) : 1;
+        // Only update the character occasionally based on changeInterval
+        drop.lastChange++;
+        if (drop.lastChange >= drop.changeInterval) {
+          drop.lastChar = char;
+          drop.lastSpecial = isSpecial;
+          drop.lastChange = 0;
+        }
         
-        // Set the character style
-        if (special) {
-          // Brighter character
-          const brightColor = isDarkTheme ? '#00FF99' : '#00AA55';
-          ctx.fillStyle = brightColor;
-          
-          // Add glow effect for special characters
-          if (glowEffect) {
-            // Glow strength varies with depth
-            const glowStrength = depthEffect ? 5 + Math.floor(drop.depth * 10) : 10;
-            ctx.shadowBlur = glowStrength;
-            ctx.shadowColor = brightColor;
-          }
-        } else {
-          // Regular character with depth-based color
-          if (depthEffect && isDarkTheme) {
-            // In dark theme, deeper chars are brighter green
-            const green = Math.floor(65 + (drop.depth * 190)); // 65-255
-            ctx.fillStyle = `rgba(0, ${green}, ${Math.floor(green/3)}, ${depthOpacity})`;
-          } else if (depthEffect && !isDarkTheme) {
-            // In light theme, deeper chars are darker green
-            const green = Math.floor(119 - (drop.depth * 70)); // 49-119
-            ctx.fillStyle = `rgba(0, ${green}, ${Math.floor(green/2)}, ${depthOpacity})`;
-          } else {
-            // No depth effect
-            ctx.fillStyle = isDarkTheme ? '#00FF41' : '#007733';
-          }
+        // Set text properties based on depth and special status
+        ctx.font = `bold ${getFontSize(drop.depth)}px monospace`;
+        ctx.fillStyle = getColor(drop.depth, drop.lastSpecial);
+        
+        // Add glow effect if enabled
+        if (glowEffect) {
+          ctx.shadowColor = isDarkTheme ? 'rgba(0, 255, 65, 0.8)' : 'rgba(0, 100, 0, 0.5)';
+          ctx.shadowBlur = 3 + drop.depth * 5;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        }
+        
+        // Draw the character
+        const x = i * 20;
+        ctx.fillText(drop.lastChar, x, drop.y);
+        
+        // Reset shadow for performance
+        if (glowEffect) {
           ctx.shadowBlur = 0;
         }
         
-        // Set font with size variation based on depth
-        let currentSize = fontSize;
-        if (depthEffect) {
-          currentSize = fontSize * (0.7 + (drop.depth * 0.6)); // 70%-130% of fontSize
-        }
-        if (special) {
-          currentSize += 2; // Special chars are slightly bigger
-        }
+        // Move the drop down
+        drop.y += drop.speed * (depthEffect ? (0.5 + drop.depth) : 1) * 2;
         
-        ctx.font = `${currentSize}px monospace`;
-        
-        // Only draw if within canvas
-        if (drop.y > 0) {
-          ctx.fillText(char, i * fontSize, drop.y * fontSize);
+        // Reset the drop when it goes off screen
+        if (drop.y > canvas.height) {
+          drop.y = -20;
+          drop.speed = (Math.random() * 0.5 + 0.5) * speed;
+          drop.depth = Math.random();
+          drop.changeInterval = Math.floor(Math.random() * 15) + 5;
         }
-        
-        // Reset drop with random probability when it reaches bottom
-        if (drop.y * fontSize > canvas.height && Math.random() > 0.975) {
-          drop.y = 0;
-          // Occasionally change depth and speed when resetting
-          if (Math.random() > 0.7) {
-            drop.depth = Math.random();
-            drop.speed = (0.5 + Math.random() * 0.5) * speed;
-          }
-        }
-        
-        // Move drop at varying speeds
-        drop.y += drop.speed;
-      }
+      });
+      
+      // Continue the animation loop
+      animationRef.current = requestAnimationFrame(drawMatrix);
     };
     
-    // Set interval for animation with speed control
-    const interval = setInterval(draw, Math.max(10, Math.floor(35 / speed)));
+    // Start the animation
+    drawMatrix();
     
-    // Handle window resize events
-    window.addEventListener('resize', handleResize);
-    
-    // Cleanup function
+    // Cleanup
     return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationRef.current);
     };
-  }, [isDarkTheme, dimensions, density, speed, fadeOpacity, matrixChars, glowEffect, depthEffect, handleResize]);
+  }, [dimensions, isDarkTheme, density, speed, fadeOpacity, characters, glowEffect, depthEffect]);
   
   return (
-    <>
-    <canvas 
-      ref={canvasRef} 
-      className="fixed top-0 left-0 w-full h-full -z-10"
-        style={{ 
-          opacity: isDarkTheme ? 0.8 : 0.6, 
-          filter: glowEffect ? 'contrast(1.1)' : 'none' 
-        }}
-      />
-      {glowEffect && (
-        <div 
-          className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10"
-          style={{ 
-            background: isDarkTheme 
-              ? 'radial-gradient(circle at center, rgba(0,100,0,0.1) 0%, rgba(0,0,0,0) 70%)' 
-              : 'radial-gradient(circle at center, rgba(0,100,0,0.05) 0%, rgba(0,0,0,0) 70%)',
-            mixBlendMode: 'screen'
-          }}
-        />
-      )}
-    </>
+    <canvas
+      ref={canvasRef}
+      className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none"
+      style={{ 
+        opacity: isDarkTheme ? 0.8 : 0.4,
+        mixBlendMode: isDarkTheme ? 'screen' : 'multiply',
+        transition: 'opacity 0.5s ease'
+      }}
+    />
   );
 };
 
-export default memo(MatrixBackground);
+export default React.memo(MatrixBackground);

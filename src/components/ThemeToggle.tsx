@@ -1,51 +1,83 @@
-import React, { useState, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon } from 'lucide-react';
+import React, { useContext } from 'react';
+import { motion } from 'framer-motion';
 import { ThemeContext } from '../App';
 import { ThemeToggleProps } from '../types';
+import { Sun, Moon } from 'lucide-react';
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const { isDarkTheme, toggleTheme: contextToggleTheme } = useContext(ThemeContext);
-
-  const handleToggleTheme = () => {
-    if (isTransitioning) return;
-    
-    setIsTransitioning(true);
-    contextToggleTheme();
-    
-    // Allow time for transition effects
-    setTimeout(() => {
-      setIsTransitioning(false);
-    }, 150);
-  };
+  const { isDarkTheme, toggleTheme } = useContext(ThemeContext);
 
   return (
     <motion.button
-      onClick={handleToggleTheme}
-      className={`relative rounded-full p-2 sm:p-1.5 backdrop-blur-sm border shadow-lg ${isDarkTheme ? 'bg-black/30 border-green-500/30 shadow-green-500/20' : 'bg-white/30 border-green-700/30 shadow-green-700/10'} ${className}`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      aria-label={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
-      disabled={isTransitioning}
-      title={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      onClick={toggleTheme}
+      className={`relative p-2 rounded-full overflow-hidden ${className}`}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      aria-label={isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      <AnimatePresence mode="wait">
+      <div 
+        className={`absolute inset-0 transition-colors duration-300 ${
+          isDarkTheme 
+            ? 'bg-black/40 backdrop-blur-md border border-green-500/30' 
+            : 'bg-white/40 backdrop-blur-md border border-green-700/20'
+        }`}
+      />
+      
+      {/* Animated background glow */}
+      <div 
+        className="absolute inset-0 opacity-50 pointer-events-none"
+        style={{
+          background: isDarkTheme 
+            ? 'radial-gradient(circle at center, rgba(0,255,65,0.2) 0%, rgba(0,0,0,0) 70%)' 
+            : 'radial-gradient(circle at center, rgba(255,255,100,0.2) 0%, rgba(0,0,0,0) 70%)',
+          transition: 'background 0.3s ease'
+        }}
+      />
+      
+      {/* Icon container */}
+      <div className="relative z-10">
         <motion.div
-          key={isDarkTheme ? 'dark' : 'light'}
-          initial={{ opacity: 0, rotate: -30 }}
-          animate={{ opacity: 1, rotate: 0 }}
-          exit={{ opacity: 0, rotate: 30 }}
-          transition={{ duration: 0.2 }}
-          className="relative w-6 h-6 sm:w-6 sm:h-6"
+          initial={false}
+          animate={{ 
+            rotate: isDarkTheme ? 0 : 180,
+            scale: 1
+          }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 15 
+          }}
         >
           {isDarkTheme ? (
-            <Sun className="w-7 h-7 sm:w-6 sm:h-6 text-yellow-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <Moon 
+              size={24} 
+              className="text-green-400 drop-shadow-[0_0_3px_rgba(0,255,65,0.5)]"
+            />
           ) : (
-            <Moon className="w-7 h-7 sm:w-6 sm:h-6 text-blue-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+            <Sun 
+              size={24} 
+              className="text-yellow-500 drop-shadow-[0_0_3px_rgba(255,255,0,0.5)]" 
+            />
           )}
         </motion.div>
-      </AnimatePresence>
+      </div>
+      
+      {/* Animated ring */}
+      <motion.div 
+        className="absolute inset-0 rounded-full pointer-events-none"
+        initial={false}
+        animate={{ 
+          borderColor: isDarkTheme ? 'rgba(0, 255, 65, 0.3)' : 'rgba(255, 255, 0, 0.3)',
+          boxShadow: isDarkTheme 
+            ? '0 0 10px rgba(0, 255, 65, 0.3), inset 0 0 5px rgba(0, 255, 65, 0.2)' 
+            : '0 0 10px rgba(255, 255, 0, 0.2), inset 0 0 5px rgba(255, 255, 0, 0.1)'
+        }}
+        transition={{ duration: 0.3 }}
+        style={{ border: '1px solid' }}
+      />
     </motion.button>
   );
 };

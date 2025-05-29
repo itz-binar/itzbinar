@@ -15,6 +15,7 @@ interface SocialCardProps {
 const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
   const [showContactForm, setShowContactForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('links'); // 'links', 'contact', 'about'
   const { isDarkTheme } = useContext(ThemeContext);
 
   // Add styles for 3D animations
@@ -30,6 +31,12 @@ const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
         .backface-hidden {
           backface-visibility: hidden;
           transform-style: preserve-3d;
+        }
+        .card-hover-3d {
+          transition: transform 0.3s ease;
+        }
+        .card-hover-3d:hover {
+          transform: translateY(-5px) scale(1.01);
         }
       `;
       document.head.appendChild(style);
@@ -119,16 +126,61 @@ const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
       transition: { duration: 0.5 }
     }
   };
+  
+  // Tab animations
+  const tabVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -20,
+      transition: { duration: 0.3 }
+    }
+  };
 
   return (
     <motion.div
       variants={fadeIn}
       initial="hidden"
       animate="visible"
-      className={`relative w-full max-w-md mx-auto px-4 sm:px-8 py-6 sm:py-10 rounded-xl bg-black/40 backdrop-blur-md border border-green-500/30 card-glow ${isMobile ? 'mt-4' : 'mt-8'}`}
+      className={`relative w-full max-w-md mx-auto px-4 sm:px-8 py-6 sm:py-10 rounded-xl backdrop-blur-lg border border-green-500/30 card-hover-3d ${
+        isDarkTheme 
+          ? 'bg-black/40 shadow-[0_0_15px_rgba(0,255,65,0.3)]' 
+          : 'bg-white/40 shadow-[0_0_15px_rgba(0,119,51,0.15)]'
+      }`}
     >
       <Toaster position="top-center" />
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-black/60 to-transparent rounded-xl -z-10"></div>
+      
+      {/* Gradient overlay */}
+      <div 
+        className="absolute top-0 left-0 w-full h-full rounded-xl -z-10 overflow-hidden"
+        style={{
+          background: isDarkTheme 
+            ? 'linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,30,0,0.8) 100%)' 
+            : 'linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(240,255,240,0.8) 100%)',
+          boxShadow: isDarkTheme
+            ? 'inset 0 0 30px rgba(0,255,65,0.1)'
+            : 'inset 0 0 30px rgba(0,119,51,0.05)'
+        }}
+      />
+      
+      {/* Animated border */}
+      <div 
+        className="absolute top-0 left-0 w-full h-full rounded-xl -z-5 overflow-hidden"
+        style={{
+          background: `linear-gradient(90deg, 
+            ${isDarkTheme ? 'rgba(0,255,65,0)' : 'rgba(0,119,51,0)'} 0%, 
+            ${isDarkTheme ? 'rgba(0,255,65,0.1)' : 'rgba(0,119,51,0.1)'} 25%, 
+            ${isDarkTheme ? 'rgba(0,255,65,0.1)' : 'rgba(0,119,51,0.1)'} 75%, 
+            ${isDarkTheme ? 'rgba(0,255,65,0)' : 'rgba(0,119,51,0)'} 100%)`,
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 3s infinite linear'
+        }}
+      />
       
       <div className="text-center mb-6 sm:mb-8">
         <motion.div
@@ -198,257 +250,343 @@ const SocialCard: React.FC<SocialCardProps> = ({ isMobile = false }) => {
               className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} text-green-500`}
             >
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              <path d="M8 11l3 3 5-5" />
             </svg>
           </motion.div>
         </motion.div>
         
-        <motion.h1 
-          className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-green-500 mb-2 sm:mb-3 font-mono tracking-wider glitch-text`}
-          whileHover={{ scale: 1.05 }}
-        >
-          BINAR
-        </motion.h1>
-        <TypewriterText
-          text="Security researcher & digital explorer"
-          className={`text-green-400 font-mono mb-3 sm:mb-4 ${isMobile ? 'text-sm' : ''}`}
-          delay={isMobile ? 80 : 60}
-        />
-        <div className="flex justify-center gap-2 mb-4 sm:mb-6">
-          <Code className="w-5 h-5 text-green-500" />
-          <TypewriterText
-            text="Exploring the digital frontier"
-            className={`text-green-300/70 ${isMobile ? 'text-xs' : 'text-sm'} font-mono`}
-            delay={isMobile ? 60 : 40}
-          />
-        </div>
+        <h2 className={`text-xl sm:text-2xl font-mono font-bold ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}>
+          <TypewriterText text="Binar Security" delay={50} />
+        </h2>
+        <p className={`text-sm sm:text-base ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'} mt-1 font-mono`}>
+          Security Researcher & Developer
+        </p>
       </div>
       
-      <div className="space-y-3 sm:space-y-4">
-        <motion.a
-          href="https://github.com/itz-binar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="social-link group flex items-center justify-between w-full px-3 sm:px-5 py-3 sm:py-4 rounded-lg bg-black/70 border border-gray-800 hover:border-green-500"
-          variants={scaleOnHover}
-          initial="initial"
-          whileHover="hover"
-          whileTap="tap"
+      {/* Tab Navigation */}
+      <div className="flex justify-center mb-6 border-b border-green-500/20">
+        <button
+          onClick={() => setActiveTab('links')}
+          className={`px-4 py-2 text-sm font-mono transition-all duration-300 relative ${
+            activeTab === 'links'
+              ? isDarkTheme 
+                ? 'text-green-400 font-bold' 
+                : 'text-green-700 font-bold'
+              : isDarkTheme
+                ? 'text-gray-400 hover:text-green-400'
+                : 'text-gray-600 hover:text-green-700'
+          }`}
         >
-          <div className="flex items-center">
+          Links
+          {activeTab === 'links' && (
             <motion.div
-              variants={iconVariants}
-              initial="initial"
-              whileHover="hover"
-            >
-              <FaGithub className="w-5 h-5 sm:w-6 sm:h-6 mr-3 sm:mr-4 text-white group-hover:text-purple-500" />
-            </motion.div>
-            <span className="font-mono text-white text-sm sm:text-base">itz-binar</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-[10px] sm:text-xs font-mono text-gray-400 group-hover:text-green-400 mr-2">@github</span>
-            <ExternalLink className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 group-hover:text-green-400" />
-          </div>
-        </motion.a>
-
-        <motion.a
-          href="https://www.youtube.com/@Binar_tech"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="social-link group flex items-center justify-between w-full px-5 py-4 rounded-lg bg-black/70 border border-gray-800 hover:border-green-500"
-          variants={scaleOnHover}
-          initial="initial"
-          whileHover="hover"
-          whileTap="tap"
-        >
-          <div className="flex items-center">
-            <motion.div
-              variants={iconVariants}
-              initial="initial"
-              whileHover="hover"
-            >
-              <FaYoutube className="w-6 h-6 mr-4 text-white group-hover:text-red-500" />
-            </motion.div>
-            <span className="font-mono text-white">Binar_tech</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-xs font-mono text-gray-400 group-hover:text-green-400 mr-2">@youtube</span>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-400" />
-          </div>
-        </motion.a>
-
-        <motion.a
-          href="https://www.tiktok.com/@itz._.binar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="social-link group flex items-center justify-between w-full px-5 py-4 rounded-lg bg-black/70 border border-gray-800 hover:border-green-500"
-          variants={scaleOnHover}
-          initial="initial"
-          whileHover="hover"
-          whileTap="tap"
-        >
-          <div className="flex items-center">
-            <motion.div
-              variants={iconVariants}
-              initial="initial"
-              whileHover="hover"
-            >
-              <FaTiktok className="w-6 h-6 mr-4 text-white group-hover:text-blue-400" />
-            </motion.div>
-            <span className="font-mono text-white">itz._.binar</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-xs font-mono text-gray-400 group-hover:text-green-400 mr-2">@tiktok</span>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-400" />
-          </div>
-        </motion.a>
+              layoutId="activeTab"
+              className={`absolute bottom-0 left-0 right-0 h-0.5 ${isDarkTheme ? 'bg-green-400' : 'bg-green-700'}`}
+              initial={false}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </button>
         
-        <motion.a
-          href="https://t.me/itz_binar"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="social-link group flex items-center justify-between w-full px-5 py-4 rounded-lg bg-black/70 border border-gray-800 hover:border-green-500"
-          variants={scaleOnHover}
-          initial="initial"
-          whileHover="hover"
-          whileTap="tap"
+        <button
+          onClick={() => setActiveTab('contact')}
+          className={`px-4 py-2 text-sm font-mono transition-all duration-300 relative ${
+            activeTab === 'contact'
+              ? isDarkTheme 
+                ? 'text-green-400 font-bold' 
+                : 'text-green-700 font-bold'
+              : isDarkTheme
+                ? 'text-gray-400 hover:text-green-400'
+                : 'text-gray-600 hover:text-green-700'
+          }`}
         >
-          <div className="flex items-center">
+          Contact
+          {activeTab === 'contact' && (
             <motion.div
-              variants={iconVariants}
-              initial="initial"
-              whileHover="hover"
-            >
-              <FaTelegram className="w-6 h-6 mr-4 text-white group-hover:text-blue-400" />
-            </motion.div>
-            <span className="font-mono text-white">itz_binar</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-xs font-mono text-gray-400 group-hover:text-green-400 mr-2">@telegram</span>
-            <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-green-400" />
-          </div>
-        </motion.a>
+              layoutId="activeTab"
+              className={`absolute bottom-0 left-0 right-0 h-0.5 ${isDarkTheme ? 'bg-green-400' : 'bg-green-700'}`}
+              initial={false}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </button>
         
-        {!showContactForm ? (
-          <div className="space-y-4 mt-8">
-        <motion.button
-              onClick={() => setShowContactForm(true)}
-              className="cyber-button flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg"
-              variants={scaleOnHover}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span className="font-mono">Contact Me</span>
-        </motion.button>
-
-        <motion.button
-              onClick={handleCopyEmail}
-              className="cyber-button flex items-center justify-center gap-2 w-full px-5 py-3 rounded-lg"
-              variants={scaleOnHover}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
-            >
-              <Mail className="w-5 h-5" />
-              <span className="font-mono">Copy Email</span>
-            </motion.button>
-          </div>
-        ) : (
-        <AnimatePresence>
-            <motion.form
-              variants={slideUpFade}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              onSubmit={handleSubmit}
-              className="mt-8 space-y-4"
-            >
+        <button
+          onClick={() => setActiveTab('about')}
+          className={`px-4 py-2 text-sm font-mono transition-all duration-300 relative ${
+            activeTab === 'about'
+              ? isDarkTheme 
+                ? 'text-green-400 font-bold' 
+                : 'text-green-700 font-bold'
+              : isDarkTheme
+                ? 'text-gray-400 hover:text-green-400'
+                : 'text-gray-600 hover:text-green-700'
+          }`}
+        >
+          About
+          {activeTab === 'about' && (
+            <motion.div
+              layoutId="activeTab"
+              className={`absolute bottom-0 left-0 right-0 h-0.5 ${isDarkTheme ? 'bg-green-400' : 'bg-green-700'}`}
+              initial={false}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          )}
+        </button>
+      </div>
+      
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'links' && (
+          <motion.div
+            key="links"
+            variants={tabVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <motion.a
+                href="https://github.com/binar-dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center p-3 rounded-lg transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-black/50 hover:bg-black/70 text-white border border-green-500/30 hover:border-green-500/60' 
+                    : 'bg-white/50 hover:bg-white/70 text-gray-800 border border-green-700/20 hover:border-green-700/40'
+                } hover:shadow-lg hover:-translate-y-1`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className="mr-2 text-green-500"
+                  variants={iconVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <FaGithub size={isMobile ? 18 : 22} />
+                </motion.div>
+                <span className="font-mono text-sm">GitHub</span>
+              </motion.a>
+              
+              <motion.a
+                href="https://www.youtube.com/c/BinarSecurity"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center p-3 rounded-lg transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-black/50 hover:bg-black/70 text-white border border-green-500/30 hover:border-green-500/60' 
+                    : 'bg-white/50 hover:bg-white/70 text-gray-800 border border-green-700/20 hover:border-green-700/40'
+                } hover:shadow-lg hover:-translate-y-1`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className="mr-2 text-red-500"
+                  variants={iconVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <FaYoutube size={isMobile ? 18 : 22} />
+                </motion.div>
+                <span className="font-mono text-sm">YouTube</span>
+              </motion.a>
+              
+              <motion.a
+                href="https://t.me/binarsec"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center p-3 rounded-lg transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-black/50 hover:bg-black/70 text-white border border-green-500/30 hover:border-green-500/60' 
+                    : 'bg-white/50 hover:bg-white/70 text-gray-800 border border-green-700/20 hover:border-green-700/40'
+                } hover:shadow-lg hover:-translate-y-1`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className="mr-2 text-blue-500"
+                  variants={iconVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <FaTelegram size={isMobile ? 18 : 22} />
+                </motion.div>
+                <span className="font-mono text-sm">Telegram</span>
+              </motion.a>
+              
+              <motion.a
+                href="https://www.tiktok.com/@binarsecurity"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center p-3 rounded-lg transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-black/50 hover:bg-black/70 text-white border border-green-500/30 hover:border-green-500/60' 
+                    : 'bg-white/50 hover:bg-white/70 text-gray-800 border border-green-700/20 hover:border-green-700/40'
+                } hover:shadow-lg hover:-translate-y-1`}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className="mr-2 text-pink-500"
+                  variants={iconVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <FaTiktok size={isMobile ? 18 : 22} />
+                </motion.div>
+                <span className="font-mono text-sm">TikTok</span>
+              </motion.a>
+              
+              <motion.button
+                onClick={handleCopyEmail}
+                className={`col-span-2 flex items-center justify-center p-3 rounded-lg transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-green-900/20 hover:bg-green-900/30 text-white border border-green-500/30 hover:border-green-500/60' 
+                    : 'bg-green-100/50 hover:bg-green-100/70 text-gray-800 border border-green-700/20 hover:border-green-700/40'
+                } hover:shadow-lg hover:-translate-y-1 mt-2`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div 
+                  className={`mr-2 ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}
+                  variants={iconVariants}
+                  initial="initial"
+                  whileHover="hover"
+                >
+                  <Mail size={isMobile ? 16 : 20} />
+                </motion.div>
+                <span className="font-mono text-sm">binarrbinar1@gmail.com</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+        
+        {activeTab === 'contact' && (
+          <motion.div
+            key="contact"
+            variants={tabVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-xs font-mono text-green-500 mb-1">Name</label>
+                <label 
+                  htmlFor="name" 
+                  className={`block mb-1 text-sm font-mono ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}
+                >
+                  Name
+                </label>
                 <input
                   type="text"
                   id="name"
                   name="name"
                   required
-                  className="cyber-input w-full px-4 py-2 rounded-md focus:outline-none"
-                  placeholder="Your name"
+                  className={`w-full p-2 rounded-md font-mono text-sm ${
+                    isDarkTheme 
+                      ? 'bg-black/50 text-white border border-green-500/30 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500' 
+                      : 'bg-white/70 text-gray-800 border border-green-700/20 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700'
+                  }`}
                 />
               </div>
-
+              
               <div>
-                <label htmlFor="email" className="block text-xs font-mono text-green-500 mb-1">Email</label>
+                <label 
+                  htmlFor="email" 
+                  className={`block mb-1 text-sm font-mono ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}
+                >
+                  Email
+                </label>
                 <input
                   type="email"
                   id="email"
                   name="email"
                   required
-                  className="cyber-input w-full px-4 py-2 rounded-md focus:outline-none"
-                  placeholder="your.email@example.com"
+                  className={`w-full p-2 rounded-md font-mono text-sm ${
+                    isDarkTheme 
+                      ? 'bg-black/50 text-white border border-green-500/30 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500' 
+                      : 'bg-white/70 text-gray-800 border border-green-700/20 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700'
+                  }`}
                 />
               </div>
-
+              
               <div>
-                <label htmlFor="message" className="block text-xs font-mono text-green-500 mb-1">Message</label>
+                <label 
+                  htmlFor="message" 
+                  className={`block mb-1 text-sm font-mono ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}
+                >
+                  Message
+                </label>
                 <textarea
                   id="message"
                   name="message"
-                  required
                   rows={4}
-                  className="cyber-input w-full px-4 py-2 rounded-md focus:outline-none resize-none"
-                  placeholder="Your message..."
-                ></textarea>
+                  required
+                  className={`w-full p-2 rounded-md font-mono text-sm ${
+                    isDarkTheme 
+                      ? 'bg-black/50 text-white border border-green-500/30 focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500' 
+                      : 'bg-white/70 text-gray-800 border border-green-700/20 focus:border-green-700 focus:outline-none focus:ring-1 focus:ring-green-700'
+                  }`}
+                />
               </div>
-
-              <div className="flex gap-2">
+              
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                  className="cyber-button flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg disabled:opacity-50"
-                  variants={scaleOnHover}
-                  initial="initial"
-                  whileHover={isSubmitting ? {} : "hover"}
-                  whileTap={isSubmitting ? {} : "tap"}
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 rounded-full loading-indicator"></div>
-                  ) : (
-                    <FaPaperPlane className="w-5 h-5" />
-                  )}
-                  <span className="font-mono">Send</span>
-                </motion.button>
-                
-                <motion.button
-                  type="button"
-                  onClick={() => setShowContactForm(false)}
-                  className="cyber-button flex items-center justify-center gap-2 px-5 py-3 rounded-lg"
-                  variants={scaleOnHover}
-                  initial="initial"
-                  whileHover="hover"
-                  whileTap="tap"
-                >
-                  <span className="font-mono">Cancel</span>
+                className={`w-full py-2 px-4 rounded-md font-mono text-sm transition-all duration-300 ${
+                  isDarkTheme 
+                    ? 'bg-green-500 hover:bg-green-600 text-black' 
+                    : 'bg-green-700 hover:bg-green-800 text-white'
+                } disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin mr-2"></div>
+                ) : (
+                  <Send size={16} className="mr-2" />
+                )}
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </motion.button>
+            </form>
+          </motion.div>
+        )}
+        
+        {activeTab === 'about' && (
+          <motion.div
+            key="about"
+            variants={tabVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className={`font-mono text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} space-y-3`}
+          >
+            <p>
+              Security researcher and developer focused on cybersecurity, penetration testing, and secure application development.
+            </p>
+            <p>
+              Specialized in vulnerability assessment, exploit development, and security awareness training.
+            </p>
+            <div className={`mt-4 p-3 rounded-md ${isDarkTheme ? 'bg-green-900/20' : 'bg-green-100/50'} border ${isDarkTheme ? 'border-green-500/30' : 'border-green-700/20'}`}>
+              <h3 className={`text-base font-bold mb-2 ${isDarkTheme ? 'text-green-400' : 'text-green-700'}`}>Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {['Penetration Testing', 'Secure Coding', 'Network Security', 'OSINT', 'Vulnerability Analysis'].map((skill, index) => (
+                  <span 
+                    key={index}
+                    className={`px-2 py-1 rounded-md text-xs ${
+                      isDarkTheme 
+                        ? 'bg-black/50 text-green-400 border border-green-500/30' 
+                        : 'bg-white/70 text-green-700 border border-green-700/20'
+                    }`}
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
-            </motion.form>
-          </AnimatePresence>
-          )}
-      </div>
-      
-      <motion.div 
-        className="mt-8 text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
-        <p className="text-green-500 font-mono text-xs tracking-wider">
-          <TypewriterText
-            text="&lt; ACCESS GRANTED /&gt;"
-            delay={100}
-          />
-        </p>
-      </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

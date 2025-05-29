@@ -194,6 +194,16 @@ body::after {
   animation: blink 1s infinite;
 }
 
+/* Shimmer animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 /* Matrix hover effect */
 .matrix-hover {
   position: relative;
@@ -219,17 +229,24 @@ body::after {
 
 /* Enhanced card styles */
 .card-glow {
-  box-shadow: var(--card-shadow);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 255, 65, 0.3);
 }
 
 .card-glow:hover {
-  box-shadow: 0 0 30px var(--accent-color);
-  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+  border-color: rgba(0, 255, 65, 0.5);
+}
+
+/* Card 3D hover effect */
+.card-hover-3d {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-3d:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 10px 25px rgba(0, 255, 65, 0.3);
 }
 
 /* Social link animations */

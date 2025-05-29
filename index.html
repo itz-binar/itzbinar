@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Binar | Digital Explorer</title>
-    <meta name="description" content="Connect with Binar across various social platforms and digital spaces.">
+    <title>Binar | Digital Workspace</title>
+    <meta name="description" content="Security Research & Development Hub - Connect with Binar across various social platforms and digital spaces.">
     <style>
       /* Critical CSS to ensure content displays even before React loads */
       html, body {
@@ -19,6 +19,7 @@
       /* Dark theme defaults */
       :root {
         --matrix-green: #00FF41;
+        --matrix-cyan: #00FFFF;
         --bg-primary: #000000;
         --text-primary: #ffffff;
         --accent-color: #00FF41;
@@ -41,7 +42,7 @@
         color: var(--text-primary);
       }
       
-      /* Loader styles in case of slow loading */
+      /* Modern loader styles */
       .loading-container {
         position: fixed;
         top: 0;
@@ -49,23 +50,112 @@
         width: 100%;
         height: 100%;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         background-color: var(--bg-primary);
         z-index: 9999;
       }
       
-      .matrix-loader {
+      .loader-title {
         font-family: monospace;
-        font-size: 24px;
+        font-size: 28px;
+        font-weight: bold;
         color: var(--matrix-green);
-        text-shadow: 0 0 5px var(--matrix-green);
-        animation: pulse 1.5s infinite alternate;
+        text-shadow: 0 0 10px var(--matrix-green);
+        margin-bottom: 20px;
+        position: relative;
+        letter-spacing: 2px;
       }
       
-      @keyframes pulse {
-        from { opacity: 0.5; }
-        to { opacity: 1; }
+      .loader-title::after {
+        content: "";
+        position: absolute;
+        right: -15px;
+        top: 5px;
+        width: 10px;
+        height: 20px;
+        background-color: var(--matrix-green);
+        animation: blink 1s infinite;
+      }
+      
+      .matrix-spinner {
+        position: relative;
+        width: 80px;
+        height: 80px;
+      }
+      
+      .matrix-spinner::before,
+      .matrix-spinner::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 4px solid transparent;
+        animation: spin 2s linear infinite;
+      }
+      
+      .matrix-spinner::before {
+        border-top-color: var(--matrix-green);
+        border-bottom-color: var(--matrix-green);
+        animation-delay: 0.5s;
+      }
+      
+      .matrix-spinner::after {
+        border-left-color: var(--matrix-cyan);
+        border-right-color: var(--matrix-cyan);
+      }
+      
+      .matrix-code {
+        position: absolute;
+        font-size: 10px;
+        color: var(--matrix-green);
+        opacity: 0.7;
+        text-shadow: 0 0 5px var(--matrix-green);
+        user-select: none;
+      }
+      
+      .loader-text {
+        font-family: monospace;
+        font-size: 14px;
+        color: var(--matrix-green);
+        margin-top: 20px;
+        opacity: 0.8;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      
+      /* Light theme overrides */
+      html.light-theme {
+        --matrix-green: #007733;
+        --matrix-cyan: #008080;
+        --bg-primary: #f0f0f0;
+        --text-primary: #212121;
+      }
+      
+      /* Noise texture overlay */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        z-index: 1;
       }
     </style>
     <script src="./theme-check.js" defer></script>
@@ -74,9 +164,39 @@
     <div id="root" class="h-full w-full">
       <!-- Fallback content that will be replaced by React -->
       <div class="loading-container">
-        <div class="matrix-loader">LOADING MATRIX...</div>
+        <div class="loader-title">DIGITAL WORKSPACE</div>
+        <div class="matrix-spinner"></div>
+        <div class="loader-text">INITIALIZING SYSTEM...</div>
       </div>
     </div>
+    <script>
+      // Add animated matrix code effect to loading screen
+      function createMatrixEffect() {
+        const container = document.querySelector('.loading-container');
+        const numElements = 20;
+        const characters = "01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ▓▒░█▄▀■□●○";
+        
+        for (let i = 0; i < numElements; i++) {
+          const element = document.createElement('div');
+          element.className = 'matrix-code';
+          element.style.left = `${Math.random() * 100}%`;
+          element.style.top = `${Math.random() * 100}%`;
+          element.style.opacity = `${Math.random() * 0.5 + 0.2}`;
+          element.style.transform = `scale(${Math.random() * 0.5 + 0.5})`;
+          element.textContent = characters[Math.floor(Math.random() * characters.length)];
+          
+          container.appendChild(element);
+          
+          // Animate the element
+          setInterval(() => {
+            element.textContent = characters[Math.floor(Math.random() * characters.length)];
+          }, Math.random() * 1000 + 500);
+        }
+      }
+      
+      // Run the matrix effect when the page loads
+      window.addEventListener('DOMContentLoaded', createMatrixEffect);
+    </script>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
