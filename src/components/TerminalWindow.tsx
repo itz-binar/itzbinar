@@ -79,13 +79,36 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
   
   // System stats
   const [stats, setStats] = useState<SystemStats>({
-    cpu: 0,
-    memory: 0,
-    network: 0,
-    threats: 0,
-    connections: 0,
-    uptime: 0
+    cpu: {
+      usage: 0,
+      cores: 4,
+      model: 'Unknown CPU',
+      speed: '0 GHz'
+    },
+    memory: {
+      used: 0,
+      total: 8192,
+      usedPercent: 0
+    },
+    network: {
+      download: 0,
+      upload: 0,
+      latency: 0
+    },
+    os: {
+      name: 'Unknown OS',
+      version: '0.0.0',
+      kernel: 'Unknown'
+    },
+    browser: {
+      name: 'Unknown Browser',
+      version: '0.0.0',
+      userAgent: 'Unknown'
+    }
   });
+  
+  // Add uptime to the system stats tracking
+  const [uptime, setUptime] = useState<number>(0);
   
   // Security events
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
@@ -220,9 +243,9 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
   // Security event generator
   const generateSecurityEvent = useCallback(() => {
     // More varied and realistic event types
-      const eventTypes = [
+    const eventTypes = [
       { 
-        type: 'scan' as const, 
+        type: 'warning' as const, 
         messages: [
           'Port scan detected from 192.168.1.42', 
           'Stealth scan blocked from 45.33.21.87',
@@ -232,7 +255,7 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
         severity: 'medium' as const 
       },
       { 
-        type: 'connection' as const, 
+        type: 'info' as const, 
         messages: [
           'Encrypted tunnel established to tor-node-458.onion', 
           'VPN handshake complete with 10.11.12.13',
@@ -242,40 +265,76 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
         severity: 'low' as const 
       },
       { 
-        type: 'firewall' as const, 
+        type: 'warning' as const, 
         messages: [
           'Firewall rule updated - blocking subnet 45.67.89.0/24', 
           'Intrusion attempt blocked from 23.94.122.35',
           'Packet filter activated for suspicious traffic',
-          'Firewall enforcing geo-blocking for region'
+          'Connection attempt blocked from blacklisted IP'
         ], 
-        severity: 'high' as const 
+        severity: 'medium' as const 
       },
       { 
-        type: 'breach' as const, 
+        type: 'error' as const, 
         messages: [
-          'Unauthorized access attempt from 78.91.23.45', 
-          'SQL injection attempt blocked on /admin endpoint',
-          'XSS attack prevented on login form',
-          'Buffer overflow exploit attempt detected'
+          'Potential data breach detected', 
+          'Multiple authentication failures from 192.168.1.55',
+          'Encryption key compromise attempt',
+          'Buffer overflow exploit blocked'
         ], 
-        severity: 'critical' as const 
+        severity: 'high' as const 
       }
-      ];
+    ];
+    
+    // Pick a random event type
+    const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+    const message = eventType.messages[Math.floor(Math.random() * eventType.messages.length)];
+    
+    const newEvent: SecurityEvent = {
+      id: Math.random().toString(36).substring(2, 15),
+      type: eventType.type,
+      message: message,
+      timestamp: Date.now(),
+      details: `Source IP: ${generateRandomIP()}, Target: ${Math.random() > 0.5 ? 'System' : 'Network'}, Protocol: ${Math.random() > 0.5 ? 'TCP' : 'UDP'}`
+    };
+    
+    setSecurityEvents(prev => [newEvent, ...prev.slice(0, 19)]);
+    
+    // Update threat level based on events
+    const threatLevel = securityEvents.reduce((acc, event) => {
+      if (event.type === 'error') return acc + 3;
+      if (event.type === 'warning') return acc + 1;
+      return acc;
+    }, 0);
+    
+    // Update uptime separately from system stats
+    setUptime(prev => prev + 1);
+    
+  }, [securityEvents]);
 
-      const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-      const randomMessage = randomEvent.messages[Math.floor(Math.random() * randomEvent.messages.length)];
+  // Function to display uptime
+  const showUptime = () => {
+    return formatUptime(uptime);
+  };
 
-      const newEvent: SecurityEvent = {
-        id: Math.random().toString(36).substr(2, 9),
-        type: randomEvent.type,
-        message: randomMessage,
-        timestamp: new Date(),
-        severity: randomEvent.severity
-      };
-
-    setSecurityEvents(prev => [newEvent, ...prev.slice(0, 6)]); // Keep more events in history
-  }, []);
+  // Display real-time system info in a stylized way
+  const showSystem = useCallback(() => {
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
+    
+    // Generate stylized ASCII box
+    return [
+      '╭─────────── REAL-TIME SYSTEM MONITOR ───────────╮',
+      `│ CPU Usage:        ${stats.cpu.usage.toFixed(1)}%                    │`,
+      `│ Memory:           ${stats.memory.usedPercent.toFixed(1)}%                    │`,
+      `│ Network I/O:      ${stats.network.download.toFixed(1)} MB/s              │`,
+      `│ OS:               ${stats.os.name} ${stats.os.version}               │`,
+      `│ Browser:          ${stats.browser.name}                   │`,
+      `│ Uptime:           ${showUptime()}                      │`,
+      '╰──────────────────────────────────────────────╯'
+    ].join('\n');
+  }, [stats, uptime]);
 
   // Focus the input when clicking terminal
   const handleTerminalClick = useCallback(() => {
@@ -521,18 +580,18 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
       },
 
       monitor: () => {
-        const uptimeHours = Math.floor(stats.uptime / 3600);
-        const uptimeMinutes = Math.floor((stats.uptime % 3600) / 60);
-        const uptimeSeconds = stats.uptime % 60;
+        const uptimeHours = Math.floor(uptime / 3600);
+        const uptimeMinutes = Math.floor((uptime % 3600) / 60);
+        const uptimeSeconds = uptime % 60;
         
         return [
           '╭─────────── REAL-TIME SYSTEM MONITOR ───────────╮',
-          `│ CPU Usage:        ${stats.cpu.toFixed(1)}%                    │`,
-          `│ Memory:          ${stats.memory.toFixed(1)}%                    │`,
-          `│ Network I/O:     ${stats.network.toFixed(1)} MB/s              │`,
-          `│ Active Conn:     ${stats.connections}                       │`,
-          `│ Threats Blocked: ${stats.threats}                       │`,
-          `│ Uptime:          ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s        │`,
+          `│ CPU Usage:        ${stats.cpu.usage.toFixed(1)}%                    │`,
+          `│ Memory:           ${stats.memory.usedPercent.toFixed(1)}%                    │`,
+          `│ Network I/O:      ${stats.network.download.toFixed(1)} MB/s              │`,
+          `│ OS:               ${stats.os.name} ${stats.os.version}               │`,
+          `│ Browser:          ${stats.browser.name}                   │`,
+          `│ Uptime:           ${uptimeHours}h ${uptimeMinutes}m ${uptimeSeconds}s        │`,
           '╰─────────────────────────────────────────────────╯'
         ];
       },
@@ -1149,6 +1208,18 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
     }
   }, [isMatrixMode, settings.fontSize, isDarkTheme, drawMatrix, handleMatrixResize, isMobile]);
 
+  // Add the generateRandomIP function
+  const generateRandomIP = () => {
+    return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+  };
+
+  // Calculate threat count based on security events
+  const getThreatCount = useCallback(() => {
+    return securityEvents.filter(event => 
+      event.type === 'error' || event.type === 'warning'
+    ).length;
+  }, [securityEvents]);
+
   return (
     <motion.div 
       ref={containerRef}
@@ -1354,12 +1425,12 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                                 <Cpu className="w-3 h-3" />
                                 <span>CPU</span>
                               </div>
-                              <span>{stats.cpu.toFixed(0)}%</span>
+                              <span>{stats.cpu.usage.toFixed(0)}%</span>
                             </div>
                             <div className="w-full bg-green-900/30 h-1.5 rounded-full mt-1 overflow-hidden">
                               <div 
                                 className="bg-green-500 h-full rounded-full" 
-                                style={{ width: `${stats.cpu}%`, transition: 'width 0.5s ease-in-out' }}
+                                style={{ width: `${stats.cpu.usage}%`, transition: 'width 0.5s ease-in-out' }}
                               />
                             </div>
                           </div>
@@ -1369,12 +1440,12 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                                 <Activity className="w-3 h-3" />
                                 <span>MEMORY</span>
                               </div>
-                              <span>{stats.memory.toFixed(0)}%</span>
+                              <span>{stats.memory.usedPercent.toFixed(0)}%</span>
                             </div>
                             <div className="w-full bg-green-900/30 h-1.5 rounded-full mt-1 overflow-hidden">
                               <div 
                                 className="bg-green-500 h-full rounded-full" 
-                                style={{ width: `${stats.memory}%`, transition: 'width 0.5s ease-in-out' }}
+                                style={{ width: `${stats.memory.usedPercent}%`, transition: 'width 0.5s ease-in-out' }}
                               />
                             </div>
                           </div>
@@ -1384,12 +1455,12 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                                 <Globe className="w-3 h-3" />
                                 <span>NETWORK</span>
                               </div>
-                              <span>{stats.network.toFixed(1)}MB/s</span>
+                              <span>{stats.network.download.toFixed(1)}MB/s</span>
                             </div>
                             <div className="w-full bg-green-900/30 h-1.5 rounded-full mt-1 overflow-hidden">
                               <div 
                                 className="bg-green-500 h-full rounded-full" 
-                                style={{ width: `${Math.min(stats.network * 10, 100)}%`, transition: 'width 0.5s ease-in-out' }}
+                                style={{ width: `${Math.min(stats.network.download * 10, 100)}%`, transition: 'width 0.5s ease-in-out' }}
                               />
                             </div>
                           </div>
@@ -1400,14 +1471,25 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                                 <span>THREATS</span>
                               </div>
                               <span className="flex items-center">
-                                {stats.threats}
-                                <span className={`ml-1 w-2 h-2 rounded-full ${stats.threats > 5 ? 'bg-red-500' : stats.threats > 0 ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+                                {getThreatCount()}
+                                <span className={`ml-1 w-2 h-2 rounded-full ${
+                                  getThreatCount() > 5 ? 'bg-red-500' : 
+                                  getThreatCount() > 0 ? 'bg-yellow-500' : 
+                                  'bg-green-500'
+                                }`}></span>
                               </span>
                             </div>
                             <div className="w-full bg-green-900/30 h-1.5 rounded-full mt-1 overflow-hidden">
                               <div 
-                                className={`h-full rounded-full ${stats.threats > 5 ? 'bg-red-500' : stats.threats > 0 ? 'bg-yellow-500' : 'bg-green-500'}`}
-                                style={{ width: `${Math.min(stats.threats * 10, 100)}%`, transition: 'width 0.5s ease-in-out' }}
+                                className={`h-full rounded-full ${
+                                  getThreatCount() > 5 ? 'bg-red-500' : 
+                                  getThreatCount() > 0 ? 'bg-yellow-500' : 
+                                  'bg-green-500'
+                                }`}
+                                style={{ 
+                                  width: `${Math.min(getThreatCount() * 10, 100)}%`, 
+                                  transition: 'width 0.5s ease-in-out' 
+                                }}
                               />
                             </div>
                           </div>
@@ -1417,7 +1499,7 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                                 <Clock className="w-3 h-3" />
                                 <span>UPTIME</span>
                               </div>
-                              <span>{formatUptime(stats.uptime)}</span>
+                              <span>{showUptime()}</span>
                             </div>
                           </div>
                           
@@ -1427,27 +1509,28 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                             <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
                               <div className="flex items-center justify-between">
                                 <span className="text-green-400/70">BROWSER:</span>
-                                <span className="text-green-300">{stats.browser || 'Unknown'}</span>
+                                <span className="text-green-300">{stats.browser.name}</span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-green-400/70">OS:</span>
-                                <span className="text-green-300">{stats.os || 'Unknown'}</span>
+                                <span className="text-green-300">{stats.os.name} {stats.os.version}</span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-green-400/70">DEVICE:</span>
-                                <span className="text-green-300">{stats.device || 'Desktop'}</span>
+                                <span className="text-green-300">
+                                  {/Mobile|Android|iOS|iPhone|iPad/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}
+                                </span>
                               </div>
                               <div className="flex items-center justify-between">
                                 <span className="text-green-400/70">CONN:</span>
-                                <span className="text-green-300">{stats.connections} active</span>
+                                <span className="text-green-300">Active</span>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
                 
                 {/* Security Events Monitor */}
                 {hudState.securityMonitor.visible && (
@@ -1477,7 +1560,7 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                         </div>
                         <div className="flex items-center">
                           <span className="text-green-400/70 text-[10px] mr-2">
-                            {stats.threats > 5 ? 'ALERT' : stats.threats > 0 ? 'CAUTION' : 'SECURE'}
+                            {securityEvents.length > 5 ? 'ALERT' : securityEvents.length > 0 ? 'CAUTION' : 'SECURE'}
                           </span>
                           <X 
                             className="w-3 h-3 text-green-500/70 hover:text-green-500 transition-colors cursor-pointer" 
@@ -1559,22 +1642,22 @@ const TerminalWindow: React.FC<TerminalWindowProps> = ({ isMobile = false }) => 
                   <div className="bg-green-900/20 border border-green-500/30 rounded p-3 text-center">
                     <Cpu className="w-5 h-5 text-green-500 mx-auto mb-2" />
                     <div className="text-green-400">CPU</div>
-                    <div className="text-xl font-bold text-green-500">{stats.cpu.toFixed(0)}%</div>
+                    <div className="text-xl font-bold text-green-500">{stats.cpu.usage.toFixed(0)}%</div>
                   </div>
                   <div className="bg-green-900/20 border border-green-500/30 rounded p-3 text-center">
                     <Activity className="w-5 h-5 text-green-500 mx-auto mb-2" />
                     <div className="text-green-400">MEMORY</div>
-                    <div className="text-xl font-bold text-green-500">{stats.memory.toFixed(0)}%</div>
+                    <div className="text-xl font-bold text-green-500">{stats.memory.usedPercent.toFixed(0)}%</div>
                   </div>
                   <div className="bg-green-900/20 border border-green-500/30 rounded p-3 text-center">
                     <Globe className="w-5 h-5 text-green-500 mx-auto mb-2" />
                     <div className="text-green-400">NETWORK</div>
-                    <div className="text-xl font-bold text-green-500">{stats.network.toFixed(0)} MB/s</div>
+                    <div className="text-xl font-bold text-green-500">{stats.network.download.toFixed(0)} MB/s</div>
                   </div>
                   <div className="bg-green-900/20 border border-green-500/30 rounded p-3 text-center">
                     <Shield className="w-5 h-5 text-green-500 mx-auto mb-2" />
                     <div className="text-green-400">THREATS</div>
-                    <div className="text-xl font-bold text-green-500">{stats.threats}</div>
+                    <div className="text-xl font-bold text-green-500">{getThreatCount()}</div>
                   </div>
                 </div>
               </div>

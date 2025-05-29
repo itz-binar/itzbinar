@@ -86,6 +86,7 @@ export interface SecurityEvent {
   message: string;
   timestamp: number;
   details?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export interface TerminalSettings {
