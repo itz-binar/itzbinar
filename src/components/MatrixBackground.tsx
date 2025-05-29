@@ -5,7 +5,7 @@ import { ThemeContext } from '../App';
 const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
   density = 1.0,
   speed = 1.0,
-  fadeOpacity = 0.02,
+  fadeOpacity = 0.01,
   characters = "01",
   glowEffect = false,
   depthEffect = false,
@@ -83,14 +83,14 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
     const getColor = (depth: number, special: boolean = false) => {
       if (isDarkTheme) {
         if (special) {
-          return `rgba(0, 255, 255, ${0.5 + depth * 0.5})`;
+          return `rgba(0, 255, 255, ${0.4 + depth * 0.4})`;
         }
-        return `rgba(0, ${155 + Math.floor(depth * 100)}, ${20 + Math.floor(depth * 60)}, ${0.6 + depth * 0.4})`;
+        return `rgba(0, ${155 + Math.floor(depth * 100)}, ${20 + Math.floor(depth * 60)}, ${0.4 + depth * 0.3})`;
       } else {
         if (special) {
-          return `rgba(0, 100, 120, ${0.7 + depth * 0.3})`;
+          return `rgba(0, 100, 120, ${0.5 + depth * 0.2})`;
         }
-        return `rgba(0, ${80 + Math.floor(depth * 40)}, ${20 + Math.floor(depth * 30)}, ${0.5 + depth * 0.5})`;
+        return `rgba(0, ${80 + Math.floor(depth * 40)}, ${20 + Math.floor(depth * 30)}, ${0.4 + depth * 0.3})`;
       }
     };
     
@@ -103,20 +103,21 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
       
       if (isDarkTheme) {
         if (special) {
-          return `0 0 ${5 + depth * 10}px rgba(0, 255, 255, ${0.5 + depth * 0.5})`;
+          return `0 0 ${5 + depth * 10}px rgba(0, 255, 255, ${0.3 + depth * 0.3})`;
         }
-        return `0 0 ${3 + depth * 5}px rgba(0, 255, 65, ${0.3 + depth * 0.4})`;
+        return `0 0 ${3 + depth * 5}px rgba(0, 255, 65, ${0.2 + depth * 0.2})`;
       } else {
         if (special) {
-          return `0 0 ${3 + depth * 5}px rgba(0, 100, 120, ${0.3 + depth * 0.3})`;
+          return `0 0 ${3 + depth * 5}px rgba(0, 100, 120, ${0.2 + depth * 0.2})`;
         }
-        return `0 0 ${2 + depth * 3}px rgba(0, 100, 0, ${0.2 + depth * 0.2})`;
+        return `0 0 ${2 + depth * 3}px rgba(0, 100, 0, ${0.1 + depth * 0.1})`;
       }
     };
     
     const drawMatrix = () => {
-      // Apply fade effect with lower opacity to prevent full blackout
-      const actualFadeOpacity = Math.min(fadeOpacity, 0.02); // Limit maximum opacity
+      // Apply extremely light fade effect to prevent any blackout
+      // Limit to a very small value (0.001) to ensure it never makes the screen black
+      const actualFadeOpacity = Math.min(fadeOpacity, 0.001);
       ctx.fillStyle = isDarkTheme 
         ? `rgba(0, 0, 0, ${actualFadeOpacity})` 
         : `rgba(245, 245, 245, ${actualFadeOpacity})`;
@@ -145,8 +146,8 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
         
         // Add glow effect if enabled
         if (glowEffect) {
-          ctx.shadowColor = isDarkTheme ? 'rgba(0, 255, 65, 0.8)' : 'rgba(0, 100, 0, 0.5)';
-          ctx.shadowBlur = 3 + drop.depth * 5;
+          ctx.shadowColor = isDarkTheme ? 'rgba(0, 255, 65, 0.5)' : 'rgba(0, 100, 0, 0.3)';
+          ctx.shadowBlur = 2 + drop.depth * 3;
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
         }
@@ -190,7 +191,7 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none"
       style={{ 
-        opacity: isDarkTheme ? 0.6 : 0.3,
+        opacity: isDarkTheme ? 0.4 : 0.2, // Significantly reduced opacity
         mixBlendMode: isDarkTheme ? 'screen' : 'multiply',
         transition: 'opacity 0.5s ease'
       }}
