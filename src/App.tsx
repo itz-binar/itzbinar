@@ -7,6 +7,8 @@ import TerminalWindow from './components/TerminalWindow';
 import ThemeToggle from './components/ThemeToggle';
 import useTheme from './hooks/useTheme';
 import { ThemeContextType } from './types';
+import { motion } from 'framer-motion';
+import './styles/globals.css';
 
 // Theme context for sharing theme state across components
 export const ThemeContext = createContext<ThemeContextType>({
@@ -18,6 +20,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 function App() {
   const { isDarkTheme, setTheme, toggleTheme } = useTheme();
   const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [theme, setThemeState] = useState('dark');
   
   // Convert the setTheme function to match the existing context shape
   const setDarkTheme = (value: boolean) => {

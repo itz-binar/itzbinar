@@ -7,7 +7,7 @@ export type Theme = 'dark' | 'light';
 
 export interface ThemeContextType {
   isDarkTheme: boolean;
-  setDarkTheme: (value: boolean) => void;
+  setTheme: (theme: string) => void;
   toggleTheme: () => void;
 }
 
@@ -52,23 +52,40 @@ export interface ParticleEffectProps {
 
 // Terminal types
 export interface SystemStats {
-  cpu: number;
-  memory: number;
-  network: number;
-  threats: number;
-  connections: number;
-  uptime: number;
-  browser?: string;
-  os?: string;
-  device?: string;
+  cpu: {
+    usage: number;
+    cores: number;
+    model: string;
+    speed: string;
+  };
+  memory: {
+    used: number;
+    total: number;
+    usedPercent: number;
+  };
+  network: {
+    download: number;
+    upload: number;
+    latency: number;
+  };
+  os: {
+    name: string;
+    version: string;
+    kernel: string;
+  };
+  browser: {
+    name: string;
+    version: string;
+    userAgent: string;
+  };
 }
 
 export interface SecurityEvent {
   id: string;
-  type: 'breach' | 'scan' | 'connection' | 'firewall';
+  type: 'warning' | 'error' | 'info' | 'success';
   message: string;
-  timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: number;
+  details?: string;
 }
 
 export interface TerminalSettings {
@@ -133,4 +150,18 @@ export interface HUDState {
     position: MonitorPosition;
     isDragging: boolean;
   };
+}
+
+export interface Command {
+  name: string;
+  description: string;
+  usage: string;
+  execute: (args: string[]) => string | JSX.Element;
+}
+
+export interface TerminalHistory {
+  id: string;
+  command: string;
+  output: string | JSX.Element;
+  timestamp: number;
 } 
