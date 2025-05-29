@@ -23,6 +23,10 @@ A cyberpunk-inspired web application with Matrix-style visual effects, featuring
 - Framer Motion
 - EmailJS for contact form
 
+## Requirements
+
+- Node.js v22+
+
 ## Development
 
 To run the project locally:

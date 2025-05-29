@@ -2,7 +2,7 @@
 Write-Host "Starting development server for Matrix Social Links project..." -ForegroundColor Green
 
 # Set path to Node.js executable
-$nodePath = ".\node-v20.12.2-win-x64\node.exe"
+$nodePath = ".\node-v22.16.0-win-x64\node.exe"
 
 # Check if Node.js executable exists
 if (-not (Test-Path $nodePath)) {

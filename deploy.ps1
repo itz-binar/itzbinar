@@ -2,7 +2,7 @@
 Write-Host "Deploying Matrix Social Links project to Netlify..." -ForegroundColor Green
 
 # Set path to Node.js executable
-$nodePath = ".\node-v20.12.2-win-x64\node.exe"
+$nodePath = ".\node-v22.16.0-win-x64\node.exe"
 
 # Check if Node.js executable exists
 if (-not (Test-Path $nodePath)) {
@@ -25,8 +25,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Run the deployment script
-Write-Host "Running Netlify deployment script..." -ForegroundColor Cyan
-& $nodePath generate-netlify-url.cjs
+Write-Host "Deploying to Netlify..." -ForegroundColor Cyan
+& $nodePath .\node_modules\netlify-cli\bin\run.js deploy --prod --dir=dist
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error: Netlify deployment failed" -ForegroundColor Red
     exit 1
