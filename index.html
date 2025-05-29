@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" class="dark-theme">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Binar | Digital Explorer</title>
+    <meta name="description" content="Connect with Binar across various social platforms and digital spaces.">
+    <style>
+      /* Critical CSS to ensure content displays even before React loads */
+      html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+      
+      /* Dark theme defaults */
+      :root {
+        --matrix-green: #00FF41;
+        --bg-primary: #000000;
+        --text-primary: #ffffff;
+        --accent-color: #00FF41;
+      }
+      
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: 'Courier New', monospace;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #root {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+      }
+      
+      /* Loader styles in case of slow loading */
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--bg-primary);
+        z-index: 9999;
+      }
+      
+      .matrix-loader {
+        font-family: monospace;
+        font-size: 24px;
+        color: var(--matrix-green);
+        text-shadow: 0 0 5px var(--matrix-green);
+        animation: pulse 1.5s infinite alternate;
+      }
+      
+      @keyframes pulse {
+        from { opacity: 0.5; }
+        to { opacity: 1; }
+      }
+    </style>
+    <script src="/theme-check.js" defer></script>
+  </head>
+  <body>
+    <div id="root" class="h-full w-full">
+      <!-- Fallback content that will be replaced by React -->
+      <div class="loading-container">
+        <div class="matrix-loader">LOADING MATRIX...</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

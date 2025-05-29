@@ -1,0 +1,548 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base theme variables */
+  --matrix-green: #00FF41;
+  --matrix-dark-green: #003B00;
+  
+  /* Theme variables with defaults (dark theme) */
+  --bg-primary: #000000;
+  --bg-secondary: rgba(0, 0, 0, 0.7);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent-color: #00FF41;
+  --accent-color-hover: #00CC33;
+  --border-color: rgba(0, 255, 65, 0.3);
+  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+  
+  /* Mobile optimizations */
+  --mobile-card-padding: 1rem;
+  --desktop-card-padding: 1.5rem;
+  --mobile-font-size: 0.875rem;
+  --desktop-font-size: 1rem;
+  
+  /* Global transition for theme changes */
+  --theme-transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Light theme variables */
+.light-theme {
+  --bg-primary: #f0f0f0;
+  --bg-secondary: rgba(255, 255, 255, 0.9);
+  --text-primary: #212121;
+  --text-secondary: rgba(33, 33, 33, 0.7);
+  --accent-color: #007733;
+  --accent-color-hover: #00994d;
+  --border-color: rgba(0, 119, 51, 0.3);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-shadow: 0 0 20px rgba(0, 119, 51, 0.2);
+}
+
+/* Dark theme variables */
+.dark-theme {
+  --bg-primary: #000000;
+  --bg-secondary: rgba(0, 0, 0, 0.7);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --accent-color: #00FF41;
+  --accent-color-hover: #00CC33;
+  --border-color: rgba(0, 255, 65, 0.3);
+  --card-bg: rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  transition: var(--theme-transition);
+}
+
+html {
+  transition: var(--theme-transition);
+}
+
+body {
+  font-family: 'Courier New', monospace;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  cursor: none;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: var(--theme-transition);
+  position: relative;
+}
+
+/* Noise texture overlay for the entire application */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+/* Scanline effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 255, 65, 0.02) 50.5%,
+    transparent 51%
+  );
+  background-size: 100% 4px;
+  z-index: 2;
+  opacity: 0.15;
+  animation: scanline 8s linear infinite;
+  will-change: transform;
+}
+
+/* Media query for mobile devices to disable some effects */
+@media (max-width: 768px) {
+  body {
+    cursor: auto;
+  }
+  
+  body::after {
+    opacity: 0.08;
+  }
+}
+
+::selection {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+}
+
+/* Terminal window styles */
+.terminal-window {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  border-left: 1px solid var(--border-color);
+}
+
+.terminal-window.minimized {
+  height: 40px;
+  overflow: hidden;
+}
+
+.terminal-window.maximized {
+  width: 100% !important;
+  height: 100vh !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border: none;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 255, 65, 0.1);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color-hover);
+}
+
+/* Terminal blinking effect */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+/* Matrix hover effect */
+.matrix-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-hover::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 20px);
+  background: linear-gradient(to bottom, transparent, var(--accent-color), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.matrix-hover:hover::before {
+  opacity: 0.2;
+}
+
+/* Enhanced card styles */
+.card-glow {
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 30px var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* Social link animations */
+.social-link {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.social-link:hover {
+  transform: translateX(5px);
+  background: rgba(0, 255, 65, 0.1);
+  border-color: var(--accent-color);
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text:hover {
+  animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both;
+  text-shadow: 0 0 5px var(--accent-color);
+}
+
+/* Enhanced particle effect */
+.particle {
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* Terminal input styles */
+input::placeholder {
+  color: var(--text-secondary);
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .card-glow {
+    padding: var(--mobile-card-padding) !important;
+    margin-bottom: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: 0 0 15px var(--accent-color) !important;
+  }
+  
+  .social-link {
+    padding: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+    font-size: var(--mobile-font-size) !important;
+  }
+  
+  .terminal-window {
+    border-radius: 0 !important;
+    width: 100% !important;
+  }
+  
+  body {
+    font-size: var(--mobile-font-size) !important;
+  }
+  
+  /* Reduce visual effects on mobile for better performance */
+  .crt-effect, 
+  body::after {
+    opacity: 0.05 !important;
+  }
+  
+  /* Adjust layout for better mobile experience */
+  .main-content {
+    padding: 1rem !important;
+  }
+  
+  /* Make form inputs easier to use on mobile */
+  input, textarea, button {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    padding: 0.75rem !important;
+  }
+}
+
+/* Terminal window adjustments */
+.terminal-window {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Enhanced typography */
+.text-shadow-glow {
+  text-shadow: 0 0 10px var(--accent-color);
+}
+
+/* Enhanced animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Matrix rain effect */
+@keyframes matrixRain {
+  0% { transform: translateY(-100%); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.matrix-rain {
+  position: absolute;
+  color: var(--accent-color);
+  text-shadow: 0 0 5px var(--accent-color);
+  animation: matrixRain 2s linear infinite;
+}
+
+/* Enhanced button styles */
+.cyber-button {
+  background: linear-gradient(45deg, rgba(0, 255, 65, 0.1), rgba(0, 255, 65, 0.2));
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.cyber-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.2), transparent);
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-button:hover {
+  background: linear-gradient(45deg, rgba(0, 255, 65, 0.2), rgba(0, 255, 65, 0.3));
+  border-color: var(--accent-color);
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px var(--accent-color);
+}
+
+.cyber-button:hover::after {
+  animation: sheen 1s forwards;
+  opacity: 1;
+}
+
+@keyframes sheen {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+/* Enhanced form styles */
+.cyber-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.cyber-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 5px var(--accent-color);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  border: 2px solid var(--bg-secondary);
+  border-top: 2px solid var(--accent-color);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Code selection styling */
+code::selection {
+  background-color: var(--accent-color);
+  color: var(--bg-primary);
+}
+
+/* Fix for #root element to take full height */
+#root {
+  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  position: relative;
+  z-index: 5;
+}
+
+/* Apply theme to html */
+html.dark-theme {
+  background-color: #000000;
+}
+
+html.light-theme {
+  background-color: #f0f0f0;
+}
+
+/* Advanced glitch effect for headings */
+.advanced-glitch {
+  position: relative;
+  text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+              -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+              0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  animation: glitch 500ms infinite;
+}
+
+.advanced-glitch span {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.advanced-glitch span:first-child {
+  animation: glitch 650ms infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  transform: translate(-0.025em, -0.0125em);
+  opacity: 0.8;
+}
+
+.advanced-glitch span:last-child {
+  animation: glitch 375ms infinite;
+  clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%);
+  transform: translate(0.025em, 0.025em);
+  opacity: 0.8;
+}
+
+/* Crt screen effect */
+.crt-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+  opacity: 0.1;
+}
+
+.crt-effect::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Responsive typography */
+h1 {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+p {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+}
