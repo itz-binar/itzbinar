@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
   const useDevReact = true;
   
   return {
+    // Use relative paths instead of absolute paths
+    base: './',
     plugins: [
       react({
         // SWC options

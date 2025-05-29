@@ -36,6 +36,9 @@ dev.bat
 # Build the project
 build.bat
 
+# Test local build
+test-local.bat
+
 # Deploy to Netlify
 deploy.bat
 ```
@@ -48,6 +51,9 @@ deploy.bat
 
 # Build the project
 .\build.ps1
+
+# Test local build
+.\test-local.ps1
 
 # Deploy to Netlify
 .\deploy.ps1
