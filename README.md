@@ -27,6 +27,34 @@ A cyberpunk-inspired web application with Matrix-style visual effects, featuring
 
 To run the project locally:
 
+### Using Batch Files (Windows)
+
+```
+# Start development server
+dev.bat
+
+# Build the project
+build.bat
+
+# Deploy to Netlify
+deploy.bat
+```
+
+### Using PowerShell Scripts
+
+```powershell
+# Start development server
+.\dev.ps1
+
+# Build the project
+.\build.ps1
+
+# Deploy to Netlify
+.\deploy.ps1
+```
+
+### Using npm (Alternative)
+
 ```bash
 # Install dependencies
 npm install
@@ -37,18 +65,17 @@ npm run dev
 
 ## Deployment to Netlify
 
-### Automatic Deployment
+### Automatic Deployment with Batch File (Windows)
 
-Run the deployment script:
-
-```bash
-node deploy.js
+```
+deploy.bat
 ```
 
-This will:
-1. Build the project if needed
-2. Deploy to Netlify using the Netlify CLI
-3. Prompt for authentication if required
+### Automatic Deployment with PowerShell
+
+```powershell
+.\deploy.ps1
+```
 
 ### Manual Deployment
 
