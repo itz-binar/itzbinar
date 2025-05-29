@@ -54,18 +54,20 @@ function App() {
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
-  // Simulate loading for smooth transitions
+  // Shorter loading time to prevent blank screen issues
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 300); // Reduced from 1000ms to 300ms
     return () => clearTimeout(timer);
   }, []);
   
   return (
     <ThemeContext.Provider value={{ isDarkTheme, setTheme, toggleTheme }}>
       {isLoading ? (
-        <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{
+          backgroundColor: isDarkTheme ? 'rgba(0, 0, 0, 0.8)' : 'rgba(240, 240, 240, 0.8)' 
+        }}>
           <div className="loading-indicator">
             <div className="w-16 h-16 border-4 border-t-matrix-green border-opacity-50 rounded-full animate-spin"></div>
           </div>
@@ -74,19 +76,19 @@ function App() {
         <div className={`h-full w-full flex flex-col ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}>
           {/* Background Effects - Optimize for mobile */}
           <MatrixBackground 
-            density={isMobile ? 0.8 : 1.3} 
-            speed={0.85} 
-            fadeOpacity={0.03} 
+            density={isMobile ? 0.6 : 1.0} // Reduced density
+            speed={0.65} // Slower speed
+            fadeOpacity={0.01} // Much reduced fade opacity
             glowEffect={true}
             depthEffect={true}
             characters="01イウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンφχψωΔΘΛΞΠΣΦΨΩ▓▒░█▄▀■□●○"
           />
           <ParticleEffect 
-            count={isMobile ? 50 : 90}
-            connectDistance={isMobile ? 150 : 190}
-            opacity={0.65}
+            count={isMobile ? 30 : 60} // Reduced particle count
+            connectDistance={isMobile ? 100 : 150} // Reduced connect distance
+            opacity={0.4} // Lower opacity
             pulseEffect={true}
-            size={1.25}
+            size={1.0} // Smaller particles
             depthEffect={true}
             trailEffect={!isMobile}
           />
@@ -96,38 +98,38 @@ function App() {
             className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
             style={{ 
               background: isDarkTheme 
-                ? 'radial-gradient(circle at 30% 50%, rgba(0,50,0,0.05) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,30,0,0.05) 0%, rgba(0,0,0,0) 70%)' 
-                : 'radial-gradient(circle at 30% 50%, rgba(0,80,0,0.02) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,50,0,0.02) 0%, rgba(0,0,0,0) 70%)',
+                ? 'radial-gradient(circle at 30% 50%, rgba(0,50,0,0.03) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,30,0,0.03) 0%, rgba(0,0,0,0) 70%)' 
+                : 'radial-gradient(circle at 30% 50%, rgba(0,80,0,0.01) 0%, rgba(0,0,0,0) 70%), radial-gradient(circle at 70% 50%, rgba(0,50,0,0.01) 0%, rgba(0,0,0,0) 70%)',
               mixBlendMode: 'screen',
               transition: 'background 0.5s ease'
             }}
           />
           
-          {/* Animated gradient overlay */}
+          {/* Animated gradient overlay - reduced opacity */}
           <div 
-            className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-10 z-0 animate-gradient-xy"
+            className="fixed top-0 left-0 w-full h-full pointer-events-none opacity-5 z-0 animate-gradient-xy"
             style={{ 
               background: isDarkTheme 
-                ? 'linear-gradient(45deg, rgba(0,255,65,0.1), rgba(0,102,255,0.1), rgba(157,0,255,0.1), rgba(0,255,255,0.1))' 
-                : 'linear-gradient(45deg, rgba(0,119,51,0.05), rgba(0,102,255,0.05), rgba(157,0,255,0.05), rgba(0,119,51,0.05))',
+                ? 'linear-gradient(45deg, rgba(0,255,65,0.05), rgba(0,102,255,0.05), rgba(157,0,255,0.05), rgba(0,255,255,0.05))' 
+                : 'linear-gradient(45deg, rgba(0,119,51,0.03), rgba(0,102,255,0.03), rgba(157,0,255,0.03), rgba(0,119,51,0.03))',
               backgroundSize: '400% 400%',
               transition: 'background 0.5s ease'
             }}
           />
           
-          {/* Vignette Effect */}
+          {/* Vignette Effect - lighter */}
           <div 
             className="fixed top-0 left-0 w-full h-full pointer-events-none"
             style={{ 
               boxShadow: isDarkTheme 
-                ? 'inset 0 0 150px rgba(0,0,0,0.7)' 
-                : 'inset 0 0 150px rgba(0,0,0,0.2)',
+                ? 'inset 0 0 150px rgba(0,0,0,0.4)' 
+                : 'inset 0 0 150px rgba(0,0,0,0.1)',
               transition: 'box-shadow 0.5s ease'
             }}
           />
           
           {/* CRT Screen Effect - Disable on mobile for performance */}
-          {!isMobile && <div className="crt-effect" style={{ opacity: isDarkTheme ? 0.1 : 0.05 }} />}
+          {!isMobile && <div className="crt-effect" style={{ opacity: isDarkTheme ? 0.05 : 0.03 }} />}
           
           {/* Custom Cursor - Only on desktop */}
           {!isMobile && <CustomCursor />}
@@ -149,7 +151,7 @@ function App() {
                   className="text-center mb-4 md:mb-8"
                 >
                   <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-green-500 font-mono tracking-tight mb-2 md:mb-4 hover:text-shadow-glow transition-all duration-300">
-                    <span className="relative inline-block advanced-glitch">
+                    <span className="relative inline-block">
                       DIGITAL WORKSPACE
                       <span className="absolute top-0 left-0 -ml-1 text-blue-400/30" aria-hidden="true">DIGITAL WORKSPACE</span>
                       <span className="absolute top-0 left-0 ml-1 text-red-400/30" aria-hidden="true">DIGITAL WORKSPACE</span>

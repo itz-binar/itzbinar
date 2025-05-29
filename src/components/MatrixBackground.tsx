@@ -5,7 +5,7 @@ import { ThemeContext } from '../App';
 const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
   density = 1.0,
   speed = 1.0,
-  fadeOpacity = 0.05,
+  fadeOpacity = 0.02,
   characters = "01",
   glowEffect = false,
   depthEffect = false,
@@ -115,10 +115,11 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
     };
     
     const drawMatrix = () => {
-      // Apply fade effect
+      // Apply fade effect with lower opacity to prevent full blackout
+      const actualFadeOpacity = Math.min(fadeOpacity, 0.02); // Limit maximum opacity
       ctx.fillStyle = isDarkTheme 
-        ? `rgba(0, 0, 0, ${fadeOpacity})` 
-        : `rgba(245, 245, 245, ${fadeOpacity})`;
+        ? `rgba(0, 0, 0, ${actualFadeOpacity})` 
+        : `rgba(245, 245, 245, ${actualFadeOpacity})`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Draw each drop
@@ -189,7 +190,7 @@ const MatrixBackground: React.FC<MatrixBackgroundProps> = ({
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none"
       style={{ 
-        opacity: isDarkTheme ? 0.8 : 0.4,
+        opacity: isDarkTheme ? 0.6 : 0.3,
         mixBlendMode: isDarkTheme ? 'screen' : 'multiply',
         transition: 'opacity 0.5s ease'
       }}

@@ -17,4 +17,4 @@
 	process = git-lfs filter-process
 	required = true
 [credential]
-	helper = helper-selector
+	helper = !\"C:/Users/binar/Downloads/project-bolt-sb1-4ke7guk5/project/PortableGit/mingw64/bin/git-credential-manager.exe\"
