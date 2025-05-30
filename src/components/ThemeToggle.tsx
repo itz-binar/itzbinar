@@ -16,12 +16,13 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '' }) => {
       className={`
         p-2 rounded-full transition-all duration-300 
         ${isDarkTheme 
-          ? 'bg-[#151515] text-green-400 border border-green-500/50 shadow-lg shadow-green-500/20' 
-          : 'bg-white text-green-700 border border-green-700/30 shadow-lg shadow-green-700/10'
+          ? 'bg-gray-800 text-blue-400 border border-blue-500/30 shadow-md' 
+          : 'bg-white text-blue-600 border border-blue-600/20 shadow-md'
         }
+        ${className}
       `}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       aria-label={isDarkTheme ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDarkTheme ? (

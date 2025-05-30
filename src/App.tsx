@@ -1,10 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
-import MatrixBackground from './components/MatrixBackground';
-import ParticleEffect from './components/ParticleEffect';
 import SocialCard from './components/SocialCard';
-import CustomCursor from './components/CustomCursor';
-import TerminalWindow from './components/TerminalWindow';
 import ThemeToggle from './components/ThemeToggle';
+import TerminalWindow from './components/TerminalWindow';
 import useTheme from './hooks/useTheme';
 import { ThemeContextType } from './types';
 import { motion } from 'framer-motion';
@@ -20,7 +17,6 @@ export const ThemeContext = createContext<ThemeContextType>({
 function App() {
   const { isDarkTheme, setTheme, toggleTheme } = useTheme();
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [showBackground, setShowBackground] = useState<boolean>(true); // Enable backgrounds but keep them subtle
   
   // Ensure proper theme application to document root
   useEffect(() => {
@@ -30,17 +26,11 @@ function App() {
     // Add smooth transitions for theme changes
     document.documentElement.style.transition = 'background-color 0.5s ease, color 0.5s ease';
     
-    // Add static background color to body - no gradients or effects that could cause black screen
+    // Add static background color to body
     document.body.style.backgroundColor = isDarkTheme 
-      ? '#111111' // Dark gray instead of black
-      : '#f5f5f5'; // Light gray
+      ? '#121212' // Dark gray
+      : '#f8f9fa'; // Light gray
     document.body.style.transition = 'background-color 0.5s ease';
-    
-    // Enable backgrounds after a short delay to ensure content is loaded first
-    const timer = setTimeout(() => {
-      setShowBackground(true);
-    }, 500);
-    return () => clearTimeout(timer);
   }, [isDarkTheme]);
 
   // Check for mobile devices
@@ -61,85 +51,78 @@ function App() {
   
   return (
     <ThemeContext.Provider value={{ isDarkTheme, setTheme, toggleTheme }}>
-      <div className={`h-full w-full flex flex-col ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}
+      <div className={`min-h-screen w-full flex flex-col ${isDarkTheme ? 'dark-theme' : 'light-theme'}`}
            style={{ 
-             backgroundColor: isDarkTheme ? '#111111' : '#f5f5f5',
+             backgroundColor: isDarkTheme ? '#121212' : '#f8f9fa',
              color: isDarkTheme ? '#ffffff' : '#333333'
            }}>
-        {/* Very minimal background effects */}
-        {showBackground && (
-          <MatrixBackground 
-            density={isMobile ? 0.1 : 0.2} // Very low density
-            speed={0.2} // Very slow
-            fadeOpacity={0.0001} // Extremely low fade opacity
-            glowEffect={false}
-            depthEffect={false}
-            characters="01"
-          />
-        )}
-        
-        {/* Very minimal particle effect */}
-        {showBackground && (
-          <ParticleEffect 
-            count={isMobile ? 5 : 10} // Very few particles
-            connectDistance={isMobile ? 40 : 60}
-            opacity={0.1} // Very low opacity
-            pulseEffect={false}
-            size={0.3} // Very small
-            depthEffect={false}
-            trailEffect={false}
-          />
-        )}
-        
-        {/* Very subtle ambient gradients */}
-        <div 
-          className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-          style={{ 
-            background: isDarkTheme 
-              ? 'radial-gradient(circle at 30% 50%, rgba(0,50,0,0.005) 0%, rgba(0,0,0,0) 80%), radial-gradient(circle at 70% 50%, rgba(0,30,0,0.005) 0%, rgba(0,0,0,0) 80%)' 
-              : 'radial-gradient(circle at 30% 50%, rgba(0,80,0,0.002) 0%, rgba(0,0,0,0) 80%), radial-gradient(circle at 70% 50%, rgba(0,50,0,0.002) 0%, rgba(0,0,0,0) 80%)',
-            mixBlendMode: 'normal',
-            opacity: 0.2
-          }}
-        />
         
         {/* Theme Toggle - Responsive position */}
-        <div className="fixed top-4 right-4 z-50">
+        <motion.div 
+          className="fixed top-4 right-4 z-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <ThemeToggle />
-        </div>
+        </motion.div>
         
         {/* Main Content Area - Improved responsiveness */}
-        <main className="flex-1 z-10 w-full max-w-6xl mx-auto px-4 py-6 md:py-8 lg:py-16">
+        <motion.main 
+          className="flex-1 z-10 w-full max-w-6xl mx-auto px-4 py-6 md:py-12 lg:py-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="grid gap-6 md:gap-8 lg:gap-12">
             <div className="space-y-6 md:space-y-8">
               {/* Profile Section */}
-              <div className="text-center mb-4 md:mb-8">
-                <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-green-500 font-mono tracking-tight mb-2 md:mb-4">
+              <motion.div 
+                className="text-center mb-4 md:mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+              >
+                <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold ${isDarkTheme ? 'text-blue-400' : 'text-blue-600'} font-sans tracking-tight mb-2 md:mb-4`}>
                   DIGITAL WORKSPACE
                 </h1>
-                <p className={`${isDarkTheme ? 'text-green-400/80' : 'text-green-700/80'} text-base md:text-lg lg:text-xl font-mono`}>
+                <p className={`${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} text-base md:text-lg lg:text-xl font-sans`}>
                   Security Research & Development Hub
                 </p>
-              </div>
+              </motion.div>
 
               {/* Main Card */}
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+              >
                 <SocialCard isMobile={isMobile} />
-              </div>
+              </motion.div>
             </div>
             
-            <footer className="text-center mt-6 md:mt-auto pb-16 md:pb-8">
-              <p className={`${isDarkTheme ? 'text-green-500/50' : 'text-green-700/50'} text-xs font-mono`}>
+            <motion.footer 
+              className="text-center mt-6 md:mt-auto pb-16 md:pb-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              <p className={`${isDarkTheme ? 'text-gray-400' : 'text-gray-500'} text-xs font-sans`}>
                 &lt;/&gt; with 💻 by Binar | {new Date().getFullYear()}
               </p>
-            </footer>
+            </motion.footer>
           </div>
-        </main>
+        </motion.main>
 
         {/* Terminal Section - Optimized for both desktop and mobile */}
-        <div className="w-full z-20 fixed bottom-0 left-0 right-0">
+        <motion.div 
+          className="w-full z-20 fixed bottom-0 left-0 right-0"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+        >
           <TerminalWindow isMobile={isMobile} />
-        </div>
+        </motion.div>
       </div>
     </ThemeContext.Provider>
   );
